@@ -99,20 +99,37 @@ git push -u origin main
 
 Replace the repository URL with your own. `node_modules/`, `dist/`, and `release/` should not be committed; use the included `.gitignore`.
 
-## Phone camera over the same Wi-Fi
+## Phone webcam over the same Wi-Fi
 
-BoothForge starts a small local sharing server on port `4317` while the desktop app is open.
+BoothForge starts a local HTTPS camera/sharing server on port `4318` while the desktop app is open. The phone can act as a live camera source inside BoothForge (it is not registered as a system-wide Windows webcam).
 
-1. Connect the booth PC and guest phone to the same private Wi-Fi network.
-2. Open BoothForge on Windows and find the **Use your phone** panel.
-3. Scan the QR code with the phone camera, or open the displayed `http://...:4317/phone` address in the phone browser.
-4. Tap **Take a photo** on the phone. The phone's camera picker opens; take/confirm the image to send it to BoothForge.
-5. Send three photos to create a strip. The desktop app will compose the strip and follow the configured print workflow.
+1. Connect the booth PC and phone to the same private Wi-Fi network.
+2. In BoothForge, open **Use your phone** and scan the QR code.
+3. If your phone shows a certificate warning, continue only if the address exactly matches the one displayed by BoothForge and you are on your own trusted Wi-Fi. The certificate is generated locally by the app and is not publicly trusted.
+4. Tap **Connect camera** on the phone page and allow camera permission.
+5. Back on the PC, click **Use phone as webcam**. The live preview should appear in the BoothForge viewfinder. Keep the phone page open and screen awake while capturing.
 
-This phone-camera feature uses the phone's native camera picker and uploads the selected capture to the desktop over your local network. It does not provide continuous live video preview or remote DSLR-style shutter control. Plain HTTP local network pages generally cannot use browser `getUserMedia()` on modern phones, which is why the camera picker is used here.
+The phone sends compressed preview frames over the local network; this is a practical low-latency preview rather than a high-bitrate professional camera feed. Camera access depends on the phone browser allowing `getUserMedia()` on the locally generated HTTPS certificate. Some iOS/Android browser versions or managed devices may refuse it; in that case use the phone's **Take a photo** workflow or a dedicated virtual-webcam app. The phone camera works as a BoothForge input, not as a webcam for other Windows apps. Windows Firewall may ask to allow private-network access. Do not port-forward this port to the internet.
 
 ## Guest QR download
 
-After a photo strip is created, the app publishes a local download page and shows a **Guest download QR** beneath the result. Guests scan it on the same Wi-Fi to view and download the PNG. The sharing server runs only while BoothForge is open, and links are intended for people on the same trusted local network. Keep the PC and phone on a private network; do not port-forward port `4317` to the internet. Windows Firewall may ask permission to allow the app on private networks.
+After a photo strip is created, the app publishes a local download page and shows a **Guest download QR** beneath the result. Guests scan it on the same Wi-Fi to view and download the PNG. The sharing server runs only while BoothForge is open, and links are intended for people on the same trusted local network. Keep the PC and phone on a private network; do not port-forward port `4318` to the internet. Windows Firewall may ask permission to allow the app on private networks.
 
 Guest photos are kept in the app's in-memory share list for the current run. Closing BoothForge ends the local sharing server, so QR links stop working after the app closes.
+
+## Custom strip designer
+
+The design panel lets you choose between a vertical strip and a two-column grid, and set the number of photos per session from 1 to 6. These choices apply to both the built-in camera and the phone camera upload workflow.
+
+- **Background artwork:** Upload a JPG, PNG, or WebP image. It is drawn behind the photo slots on the final strip. High-resolution artwork is recommended; the image is cropped to fill the canvas.
+- **Photo frame overlay:** Upload a transparent PNG or WebP frame designed for the photo slot aspect ratio. The frame is drawn over each captured photo. Use transparency in the center so the photo remains visible.
+- **Caption:** Edit the caption field above the design controls; it appears at the bottom of the finished strip.
+
+Uploaded artwork and freeform holder positions are currently kept in app memory for the current run; re-upload artwork and recreate the layout after restarting BoothForge. The custom canvas supports up to 12 draggable photo holders. The holder count controls the capture count; each photo is center-cropped into its corresponding holder when the final strip is composed.
+
+
+## Custom layout templates and canvas orientation
+
+In **Design Your Strip**, choose **Portrait (2:3)** or **Landscape (3:2)** under Canvas Orientation. The exported PNG is rendered at 900 × 1350 px for portrait or 1350 × 900 px for landscape. Photo holders retain percentage-based positions when switching orientation, so you can rearrange them to fit the new canvas.
+
+To reuse a design, enter a template name and choose **Save layout**. Use **Load saved layout** to restore its orientation, photo-holder positions and sizes, caption, frame style, background artwork, and photo-frame overlay. Saved templates are stored locally in this Windows user profile using browser local storage; they do not sync to other computers. Large uploaded images can exceed the local storage limit, so use reasonably sized artwork files.

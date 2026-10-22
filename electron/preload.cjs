@@ -7,6 +7,11 @@ contextBridge.exposeInMainWorld('boothAPI', {
   openFolder: (folderPath) => ipcRenderer.invoke('booth:open-folder', folderPath),
   getNetworkInfo: () => ipcRenderer.invoke('booth:get-network-info'),
   publishPhoto: (payload) => ipcRenderer.invoke('booth:publish-photo', payload),
+  onPhoneFrame: (callback) => {
+    const listener = (_event, dataUrl) => callback(dataUrl);
+    ipcRenderer.on('booth:phone-frame', listener);
+    return () => ipcRenderer.removeListener('booth:phone-frame', listener);
+  },
   onPhonePhoto: (callback) => {
     const listener = (_event, dataUrl) => callback(dataUrl);
     ipcRenderer.on('booth:phone-photo', listener);
